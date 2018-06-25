@@ -911,7 +911,7 @@ func (l *loggingT) flushAll() {
 //
 // Valid names are "INFO", "WARNING", "ERROR", and "FATAL".  If the name is not
 // recognized, CopyStandardLogTo panics.
-func CopyStandardLogTo(name string) {
+func CopyStandardLogTo(name string) io.Writer {
 	sev, ok := severityByName(name)
 	if !ok {
 		panic(fmt.Sprintf("log.CopyStandardLogTo(%q): unrecognized severity name", name))
@@ -919,7 +919,9 @@ func CopyStandardLogTo(name string) {
 	// Set a log format that captures the user's file and line:
 	//   d.go:23: message
 	stdLog.SetFlags(stdLog.Lshortfile)
-	stdLog.SetOutput(logBridge(sev))
+	w := logBridge(sev)
+	stdLog.SetOutput(w)
+	return w
 }
 
 // logBridge provides the Write method that enables CopyStandardLogTo to connect
